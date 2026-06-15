@@ -365,6 +365,23 @@ Their `ANTHROPIC_API_KEY` (and any other credentials they added) should appear b
 
 ---
 
+## Step 8.5 - Pre-trust the workspace (optional, stops the folder-trust nag)
+
+On first launch in any directory, Claude Code shows **"Do you trust the files in this folder?"** and the user must accept. This is a deliberate safety gate; there is no `settings.json` key or safe env var to disable it (bypass mode would skip it, but it is locked off here on purpose). The supported way to stop the repeated prompt for directories the user already trusts is to pre-write the per-directory trust flag into `~/.claude.json`. The kernel ships `~/.claude/scripts/trust-workspace.sh` for exactly this.
+
+Offer to pre-trust the workspace base path from Step 2 and each directory created in the workspace copy:
+
+```bash
+~/.claude/scripts/trust-workspace.sh <base-path>/<chosen-dir-1> <base-path>/<chosen-dir-2>
+```
+
+- It backs up `~/.claude.json`, merges (never overwrites), and validates JSON before saving.
+- It weakens nothing else: normal permission prompting and `disableBypassPermissionsMode` stay fully in force. It only persists "yes, I trust this folder" up front, exactly as clicking Yes would.
+- Brand-new directories opened later still prompt once - correct for a safety baseline. Re-run the script for those, or just accept once.
+- The install session is itself a Claude Code session, so if the prompt persists after the Step 9 restart, have the user run the command once more from a plain terminal (a running session can overwrite `~/.claude.json` on exit).
+
+---
+
 ## Step 9 - Verification
 
 Tell the user to **restart their Claude Code session** so the new `settings.json` takes effect. After restart, they can verify:
