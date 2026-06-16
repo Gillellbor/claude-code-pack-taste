@@ -1,3 +1,16 @@
+---
+type: core
+title: "Claude Code Pack - Taste edition"
+status: active
+summary: "Baseline Claude Code configuration tuned for an agency power-user cohort: ambassadors and technically curious marketers who write Python scripts, build small apps with Claude Code, and do knowledge wo"
+created: 2026-06-13
+updated: 2026-06-13
+created_by: Šimon Hradní
+client: ~
+path: README.md
+tags: [readme]
+---
+
 # Claude Code Pack - Taste edition
 
 Baseline Claude Code configuration tuned for an agency power-user cohort: ambassadors and technically curious marketers who write Python scripts, build small apps with Claude Code, and do knowledge work day-to-day.
@@ -19,9 +32,11 @@ Pokud je tvoje zkušenost s AI claude.ai a nic víc - začni krátkým [**`UZIVA
 - **Auto-research hook** - detects unmarked notes in `notes.md`, dispatches background research via the Anthropic API, marks each as ✅ (research done) or ⏭️ (skipped).
 - **Time-injection hook** - adds the current local time to Claude's context every prompt.
 - **Statusline** - three-line live status (model · throughput · cost / project · branch · context / 5-hour and 7-day rate-limit usage). Lets you see when you're burning through your team-plan allotment.
-- **Five rules** - documentation standard, respect-denies behavior, subagent usage guide, notes convention, language (which language to use, plus native-Czech style: banned AI calques, typography).
-- **Five skills** - `setup` (project scaffolding), `skill-creator`, `prd-creator`, `dr-prompt`, `client-data-check` (PII scanner for files before they leave the machine).
-- **Helper script** - `list-env-keys.sh` exposes *names* of credential env vars without ever revealing values.
+- **Six rules** - documentation standard (incl. frontmatter standard pointer), respect-denies behavior (updated three-tier env model), subagent usage guide, notes convention, language (which language to use, plus native-Czech style: banned AI calques, typography), frontmatter standard.
+- **Five skills** - `setup` (project scaffolding, with template-based gitignore/env schema and local git autosave), `skill-creator`, `prd-creator`, `dr-prompt`, `client-data-check` (PII scanner for files before they leave the machine).
+- **Two agents** - `prompt-engineer` (author/refine/validate any prompt or skill, model-aware), `research-analyst` (focused single-topic lookup with sourced verdict inline).
+- **Helper scripts** - `list-env-keys.sh` exposes *names* of credential env vars without ever revealing values; `env-key-classify.py` adds value-state classification (empty/placeholder/filled+kind); `git-autosave.sh` local-only git safety net for any work folder.
+- **Ignore + env templates** - `gitignore`, `claudeignore`, and per-workspace-type `.env.example` schemas (`klient`, `dev`, `app`, `general`) plus `.env.shared` skeleton. The `setup` skill copies these automatically.
 
 ### Workspace (chosen path, default `~/Documents/`)
 - `_CONTEXT/` - personal profile, notes, best-practices.
@@ -71,12 +86,17 @@ What changed in this fork:
 - **Statusline added** (`kernel/statusline.sh`) - three-line live status with cost, context, and 5h/7d rate-limit usage. Important for team-plan visibility.
 - **Browser data added to deny** - Safari/Chrome/Chromium/Firefox/Brave/Edge/Arc cookie and history directories are unreadable. Vibe-coded scripts shouldn't quietly mine your session cookies.
 - **`context-bloat-guard.py` hook added** - soft brake on huge file reads.
-- **Bash safety hook extended** - browser data extraction patterns, `python -c` bypass patterns.
+- **Bash safety hook extended** - browser data extraction patterns, `python -c` bypass patterns, updated `.env.shared` soft-tier model.
 - **`language.md` rule added** - single authority for which language to use (English for system files, Czech for chat and deliverables) plus native-Czech style that blocks AI calques.
 - **`client-data-check` skill added** - offline PII scanner.
 - **`inbox-processor.sh` hook removed** - per-edit API calls were nudging team-plan usage; teams can re-enable it from the upstream if they want.
 - **`_CLIENTS/taste/` scaffold included** - pre-built example client workspace.
 - **INSTRUCTIONS.md interactive interview rewritten** - explicit workspace-path prompt (no `~/Documents/` assumption), OS-specific dependency setup, conflict checks before any overwrite.
+- **Frontmatter standard added** (`rules/frontmatter-standard.md`) - unified OKF-aligned YAML frontmatter for every markdown artifact, closed type buckets, predefined tag vocabulary.
+- **Two agents added** - `prompt-engineer` and `research-analyst` with full validation and source-citing constraints.
+- **`env-key-classify.py` + `git-autosave.sh` added** - env value-state classifier (names+kind only, never values); local-only git time machine for any work folder.
+- **Ignore + env templates added** - `gitignore`, `claudeignore`, and per-type `.env.example` + `.env.shared` schemas; `setup` skill copies them automatically.
+- **Env model updated** - three-tier model (global `~/.claude/.env` HARD / project `.env*` HARD / `.env.shared` SOFT) replaces the old `.env.local`-as-readable exception. `respect-denies.md` and `setup` skill document this consistently.
 
 ## License
 

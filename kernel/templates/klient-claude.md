@@ -1,3 +1,16 @@
+---
+type: notes
+title: "klient-claude"
+status: active
+summary: ""
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/templates/klient-claude.md
+tags: [note]
+---
+
 <purpose>
 Client project: {{CLIENT_NAME}}
 {{ONE_LINE_DESCRIPTION}}

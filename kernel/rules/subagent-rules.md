@@ -1,3 +1,16 @@
+---
+type: notes
+title: "subagent-rules"
+status: active
+summary: ""
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/rules/subagent-rules.md
+tags: [note]
+---
+
 <subagent_rules>
 
 ## When to use

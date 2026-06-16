@@ -1,3 +1,16 @@
+---
+type: notes
+title: "Uživatelský manuál"
+status: active
+summary: "Tenhle Pack je hotové, bezpečné nastavení pro **Claude Code (CC)** - terminálovou appku od Anthropic, která ti reálně dělá věci na počítači: píše soubory, spouští příkazy, umí nainstalovat skoro cokol"
+created: 2026-06-13
+updated: 2026-06-13
+created_by: Šimon Hradní
+client: ~
+path: UZIVATELSKY-MANUAL.md
+tags: [note]
+---
+
 # Uživatelský manuál
 
 Tenhle Pack je hotové, bezpečné nastavení pro **Claude Code (CC)** - terminálovou appku od Anthropic, která ti reálně dělá věci na počítači: píše soubory, spouští příkazy, umí nainstalovat skoro cokoliv. Pack ho nastaví tak, aby ti omylem nesmazal data nebo nesahal na citlivé věci, a přidá pár nástrojů, co se hodí při běžné práci.

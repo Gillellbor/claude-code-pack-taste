@@ -1,10 +1,28 @@
+---
+type: core
+title: "Custom Subagents"
+status: active
+summary: "This directory holds custom subagent definitions."
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/agents/README.md
+tags: [readme]
+---
+
 # Custom Subagents
 
 This directory holds custom subagent definitions. Files here are auto-discovered by Claude Code and made available as subagent types you can dispatch via the `Agent` tool.
 
-## Default state
+## Included agents
 
-The starter pack ships this directory **empty**. Built-in subagents (`general-purpose`, `Explore`, `Plan`) cover the most common needs and have known-good MCP / WebSearch behavior.
+The pack ships two agents in this directory:
+
+- **`prompt-engineer`** - author, refine, and validate any prompt, skill, or agent file. Model-aware (verifies current lineup via web search), with a mandatory two-tier eval (sanity + single-judge subagent). Use when writing or improving any system prompt or Claude Code skill.
+- **`research-analyst`** - focused single-topic lookup returning a self-contained verdict inline. Every claim explained, abbreviations defined, key findings linked. For quick research, not deep multi-source investigation.
+
+Built-in subagents (`general-purpose`, `Explore`, `Plan`) cover the most common needs and have known-good MCP / WebSearch behavior.
 
 ## When to add a custom subagent
 
@@ -15,11 +33,11 @@ Add a custom agent here only when you need:
 
 ## Caveat: known MCP-visibility bug
 
-As of 2026-05, Claude Code issues [#13898](https://github.com/anthropics/claude-code/issues/13898) and [#13605](https://github.com/anthropics/claude-code/issues/13605) document that custom subagents in this directory may **silently hallucinate MCP tool results** — they appear to call MCP servers but invent the response. This affects both project-scoped and (sometimes) user-scoped MCPs.
+As of 2026-05, Claude Code issues [#13898](https://github.com/anthropics/claude-code/issues/13898) and [#13605](https://github.com/anthropics/claude-code/issues/13605) document that custom subagents in this directory may **silently hallucinate MCP tool results** - they appear to call MCP servers but invent the response. This affects both project-scoped and (sometimes) user-scoped MCPs.
 
 Practical implication: **do NOT use custom subagents for MCP-dependent research**. Use the built-in `general-purpose` subagent instead. The starter pack's `~/.claude/rules/subagent-rules.md` enforces this rule in your main session.
 
-If you write a custom agent, prefer tasks that don't depend on MCP calls — pure reasoning, code generation, structured analysis from inline content.
+If you write a custom agent, prefer tasks that don't depend on MCP calls - pure reasoning, code generation, structured analysis from inline content.
 
 ## Format
 

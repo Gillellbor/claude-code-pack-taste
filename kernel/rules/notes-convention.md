@@ -1,3 +1,16 @@
+---
+type: notes
+title: "notes-convention"
+status: active
+summary: ""
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/rules/notes-convention.md
+tags: [note]
+---
+
 <notes_convention>
 
 ## Notes.md — Writing and Behavior

@@ -1,3 +1,16 @@
+---
+type: core
+title: "Transcribe (stub)"
+status: active
+summary: "Local audio/video → markdown transcript via LLM API."
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: workspace/_APPS/_example-app-transcribe/README.md
+tags: [readme]
+---
+
 # Transcribe (stub)
 
 Local audio/video → markdown transcript via LLM API.

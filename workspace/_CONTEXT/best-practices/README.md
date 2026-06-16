@@ -1,3 +1,16 @@
+---
+type: core
+title: "Best Practices"
+status: active
+summary: "One markdown file per topic. Capture *your* approach to recurring problems - distinct from generic online best practice."
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: workspace/_CONTEXT/best-practices/README.md
+tags: [readme]
+---
+
 # Best Practices
 
 > One markdown file per topic. Capture *your* approach to recurring problems — distinct from generic online best practice.

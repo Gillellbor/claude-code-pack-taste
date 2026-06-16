@@ -1,3 +1,16 @@
+---
+type: context
+title: "documentation-standard"
+status: active
+summary: ""
+created: 2026-06-13
+updated: 2026-06-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/rules/documentation-standard.md
+tags: [standard]
+---
+
 <documentation_standard>
 
 ## Format
@@ -26,6 +39,10 @@ Autocompact will destroy context. Documentation is the only defense.
 - WORKSTATE.md is append-only - never delete it. It is the project's journal and survives autocompact precisely because it is not reset. Add new log entries newest-first; when a task completes, record that in the log and in README.md rather than wiping the file
 - Version all changes with dates
 - Outdated docs are worse than no docs
+
+## Frontmatter (every markdown document)
+
+Every markdown artifact carries a small YAML frontmatter core (`type`, `status`, `summary`, `created`, `updated`, `created_by`, `client`, `path`, `tags`) so an agent orients from the frontmatter alone without reading the body. `type` is one of 7 CLOSED buckets (core / strategy / product_design / research / devops / context / notes); the fine kind, technology, and topic live in `tags`. The full standard (bucket definitions, the predefined tag vocabulary, per-loader rules for skills/agents/plugins/system docs, OKF alignment) lives in `~/.claude/rules/frontmatter-standard.md` - a reference, not auto-loaded; skills read it on demand. An OKF-conformant superset (Google Open Knowledge Format). Kept there, not inline, so this rule does not bloat.
 
 ## Language
 Language routing (which language to use) and native-Czech quality (how to write Czech output well) are owned by `language.md`. This file no longer governs language.

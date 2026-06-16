@@ -1,3 +1,16 @@
+---
+type: notes
+title: "general-claude"
+status: active
+summary: ""
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/templates/general-claude.md
+tags: [note]
+---
+
 <purpose>
 {{PROJECT_NAME}}: {{ONE_LINE_DESCRIPTION}}
 </purpose>

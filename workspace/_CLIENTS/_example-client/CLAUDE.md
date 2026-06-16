@@ -1,3 +1,16 @@
+---
+type: core
+title: "CLAUDE"
+status: active
+summary: ""
+created: 2026-06-13
+updated: 2026-06-13
+created_by: Šimon Hradní
+client: ~
+path: workspace/_CLIENTS/_example-client/CLAUDE.md
+tags: [agents-manifest]
+---
+
 <purpose>
 Client engagement: {{CLIENT_NAME}}.
 

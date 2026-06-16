@@ -1,3 +1,16 @@
+---
+type: notes
+title: "Instructions for Claude - Pack Installation"
+status: active
+summary: "You are reading this because the user just cloned the Claude Code Pack and ran `claude` in the repo root."
+created: 2026-06-16
+updated: 2026-06-16
+created_by: Šimon Hradní
+client: ~
+path: INSTRUCTIONS.md
+tags: [note]
+---
+
 # Instructions for Claude - Pack Installation
 
 You are reading this because the user just cloned the Claude Code Pack and ran `claude` in the repo root. Your job is to walk them through installation **safely and interactively**, with explicit confirmation at every major step. Treat the user as a smart power-user who hasn't done this before - explain what each step does, ask before touching anything outside the repo, and respect their preferences (path, OS, names).

@@ -1,3 +1,16 @@
+---
+type: notes
+title: "Customization"
+status: active
+summary: "How to extend, modify, or replace pieces of the starter pack to fit your work."
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: docs/customization.md
+tags: [note]
+---
+
 # Customization
 
 How to extend, modify, or replace pieces of the starter pack to fit your work.

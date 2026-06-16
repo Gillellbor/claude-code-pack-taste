@@ -1,3 +1,16 @@
+---
+type: notes
+title: "dev-claude"
+status: active
+summary: ""
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/templates/dev-claude.md
+tags: [note]
+---
+
 <purpose>
 {{PROJECT_NAME}}: {{ONE_LINE_DESCRIPTION}}
 </purpose>

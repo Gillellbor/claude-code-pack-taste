@@ -1,3 +1,16 @@
+---
+type: core
+title: "Rules"
+status: active
+summary: "Files in this directory are auto-loaded into every Claude Code session as system context."
+created: 2026-06-13
+updated: 2026-06-13
+created_by: Šimon Hradní
+client: ~
+path: kernel/rules/README.md
+tags: [readme]
+---
+
 # Rules
 
 Files in this directory are auto-loaded into every Claude Code session as system context. They define how Claude behaves across all projects.

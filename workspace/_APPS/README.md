@@ -1,3 +1,16 @@
+---
+type: core
+title: "_APPS"
+status: active
+summary: "Small apps and tools you build."
+created: 2026-05-13
+updated: 2026-05-13
+created_by: Šimon Hradní
+client: ~
+path: workspace/_APPS/README.md
+tags: [readme]
+---
+
 # _APPS
 
 Small apps and tools you build. Each app is a self-contained subdirectory.

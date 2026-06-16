@@ -1,3 +1,16 @@
+---
+type: core
+title: "AGENTS"
+status: active
+summary: ""
+created: 2026-06-13
+updated: 2026-06-13
+created_by: Šimon Hradní
+client: ~
+path: workspace/_CLIENTS/taste/AGENTS.md
+tags: [agents-manifest]
+---
+
 <purpose>
 Client project: Taste
 {{ONE_LINE_DESCRIPTION}}
