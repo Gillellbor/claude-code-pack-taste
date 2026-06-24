@@ -1,14 +1,16 @@
 ---
 type: core
 title: "Claude Code Pack - Taste edition"
-status: active
+status: approved
 summary: "Baseline Claude Code configuration tuned for an agency power-user cohort: ambassadors and technically curious marketers who write Python scripts, build small apps with Claude Code, and do knowledge wo"
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+created: 2026-06-13 21:07
+updated: 2026-06-13 21:07
+owner: Šimon Hradní
 client: ~
 path: README.md
 tags: [readme]
+version: "1.0.0"
+release: latest
 ---
 
 # Claude Code Pack - Taste edition
@@ -27,13 +29,13 @@ Pokud je tvoje zkušenost s AI claude.ai a nic víc - začni krátkým [**`UZIVA
 
 ### Kernel (`~/.claude/`)
 - **Restrictive `settings.json`** - destructive bash patterns, sensitive file reads, browser cookie/history dirs, and `--no-verify` style escapes are denied at the global level. Bypass mode is locked off.
-- **Bash safety hook** - catches two-step download-execute, subshell bypasses, secret-file reads (every `.env` except the deliberate `.env.local` handoff, via bash or the Read tool), browser data extraction, and `python -c` bypasses.
+- **Bash safety hook** - catches two-step download-execute, subshell bypasses, a recursive `rm` hidden in a chained command, a `mv` that would silently overwrite an existing file, secret-file reads (every `.env` / `.env.*` except the readable `.env.shared` soft tier and non-secret templates, via bash or the Read tool), browser data extraction, and `python -c` bypasses.
 - **Context-bloat guard** - soft brake on `Read` of files larger than ~50k tokens. Forces Claude to either chunk the read or ask the user to confirm. Prevents the "Claude loaded an 80MB CSV and now the session is dead" scenario.
 - **Auto-research hook** - detects unmarked notes in `notes.md`, dispatches background research via the Anthropic API, marks each as ✅ (research done) or ⏭️ (skipped).
 - **Time-injection hook** - adds the current local time to Claude's context every prompt.
 - **Statusline** - three-line live status (model · throughput · cost / project · branch · context / 5-hour and 7-day rate-limit usage). Lets you see when you're burning through your team-plan allotment.
 - **Six rules** - documentation standard (incl. frontmatter standard pointer), respect-denies behavior (updated three-tier env model), subagent usage guide, notes convention, language (which language to use, plus native-Czech style: banned AI calques, typography), frontmatter standard.
-- **Five skills** - `setup` (project scaffolding, with template-based gitignore/env schema and local git autosave), `skill-creator`, `prd-creator`, `dr-prompt`, `client-data-check` (PII scanner for files before they leave the machine).
+- **Six skills** - `setup` (project scaffolding, with template-based gitignore/env schema and local git autosave), `skill-creator`, `prd-creator`, `dr-prompt`, `client-data-check` (PII scanner for files before they leave the machine), `idea-file-creator` (capture an idea as a self-contained, leak-free idea file for handoff or later).
 - **Two agents** - `prompt-engineer` (author/refine/validate any prompt or skill, model-aware), `research-analyst` (focused single-topic lookup with sourced verdict inline).
 - **Helper scripts** - `list-env-keys.sh` exposes *names* of credential env vars without ever revealing values; `env-key-classify.py` adds value-state classification (empty/placeholder/filled+kind); `git-autosave.sh` local-only git safety net for any work folder.
 - **Ignore + env templates** - `gitignore`, `claudeignore`, and per-workspace-type `.env.example` schemas (`klient`, `dev`, `app`, `general`) plus `.env.shared` skeleton. The `setup` skill copies these automatically.
@@ -86,7 +88,7 @@ What changed in this fork:
 - **Statusline added** (`kernel/statusline.sh`) - three-line live status with cost, context, and 5h/7d rate-limit usage. Important for team-plan visibility.
 - **Browser data added to deny** - Safari/Chrome/Chromium/Firefox/Brave/Edge/Arc cookie and history directories are unreadable. Vibe-coded scripts shouldn't quietly mine your session cookies.
 - **`context-bloat-guard.py` hook added** - soft brake on huge file reads.
-- **Bash safety hook extended** - browser data extraction patterns, `python -c` bypass patterns, updated `.env.shared` soft-tier model.
+- **Bash safety hook extended** - browser data extraction patterns, `python -c` bypass patterns, a recursive-rm-in-a-chained-command guard and a mv-overwrite guard, updated `.env.shared` soft-tier model.
 - **`language.md` rule added** - single authority for which language to use (English for system files, Czech for chat and deliverables) plus native-Czech style that blocks AI calques.
 - **`client-data-check` skill added** - offline PII scanner.
 - **`inbox-processor.sh` hook removed** - per-edit API calls were nudging team-plan usage; teams can re-enable it from the upstream if they want.
@@ -96,7 +98,9 @@ What changed in this fork:
 - **Two agents added** - `prompt-engineer` and `research-analyst` with full validation and source-citing constraints.
 - **`env-key-classify.py` + `git-autosave.sh` added** - env value-state classifier (names+kind only, never values); local-only git time machine for any work folder.
 - **Ignore + env templates added** - `gitignore`, `claudeignore`, and per-type `.env.example` + `.env.shared` schemas; `setup` skill copies them automatically.
-- **Env model updated** - three-tier model (global `~/.claude/.env` HARD / project `.env*` HARD / `.env.shared` SOFT) replaces the old `.env.local`-as-readable exception. `respect-denies.md` and `setup` skill document this consistently.
+- **Env model updated** - three-tier model (global `~/.claude/.env` HARD / project `.env*` HARD / `.env.shared` SOFT) replaces the old `.env.local`-as-readable exception. `respect-denies.md`, `setup` skill, `INSTRUCTIONS.md`, `UZIVATELSKY-MANUAL.md`, and `docs/safety-model.md` document this consistently.
+- **`idea-file-creator` skill added** - capture a thought as a self-contained, leak-free, machine-readable idea file (an ADR for ideas) for handoff or parking for later.
+- **Permission lists tuned** - `allow` widened to cover safe day-to-day commands (read-only inspection, build tools, media tooling like `ffmpeg`/`magick`, broad `git`, `docker`/`ssh`) so they do not nag; install-class (`npm install`, `pip install`, `brew`), network-reaching (`scp`/`rsync`), and `git push`/`rebase`/`merge` stay in `ask`; destructive forms stay denied. Two `bash-safety-extended.py` guards added: recursive-rm in a chained command, and a mv that would overwrite an existing file.
 
 ## License
 

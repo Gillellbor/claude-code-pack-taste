@@ -1,14 +1,16 @@
 ---
 type: notes
 title: "Uživatelský manuál"
-status: active
+status: approved
 summary: "Tenhle Pack je hotové, bezpečné nastavení pro **Claude Code (CC)** - terminálovou appku od Anthropic, která ti reálně dělá věci na počítači: píše soubory, spouští příkazy, umí nainstalovat skoro cokol"
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+created: 2026-06-13 00:00
+updated: 2026-06-13 00:00
+owner: Šimon Hradní
 client: ~
 path: UZIVATELSKY-MANUAL.md
 tags: [note]
+version: "1.0.0"
+release: latest
 ---
 
 # Uživatelský manuál
@@ -38,7 +40,7 @@ Claude tě provede nastavením otázku po otázce. **Každý krok schvaluješ ty
 
 1. **Čti plán, než řekneš „ano".** Většina chyb vzniká z odsouhlasení nepřečteného plánu.
 2. **Když Claude něco nesmí, neobcházej to.** Řekni mu cíl, ne work-around. Navrhne bezpečnější cestu, nebo ti dá příkaz ke spuštění ručně.
-3. **API klíče a tokeny dej do `~/.claude/.env`.** Claude do hodnot nevidí, pracuje jen s názvy klíčů. Když mu nějaký klíč reálně potřebuješ dát, je na to soubor `.env.local` v daném projektu.
+3. **API klíče a tokeny dej do `~/.claude/.env`.** Claude do hodnot nevidí, pracuje jen s názvy klíčů a používá je přes program, který klíč nikdy neukáže. Citlivý klíč patří do `.env` (Claude ho nepřečte). Jen málo rizikové hodnoty, které Claude číst smí (notifikační webhook, kontaktní e-mail), dej do `.env.shared`.
 4. **Statusbar dole čti.** Hlavně stav kontextu a kolik z týmového limitu jedeš.
 5. **Nový projekt = `/setup`.** Připraví složky a šablony, předtím se doptá, jak to chceš mít ty.
 
