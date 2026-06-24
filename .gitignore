@@ -10,6 +10,11 @@
 *.swo
 *~
 
+# Python bytecode (the .py hooks generate this when run)
+__pycache__/
+*.pyc
+*.pyo
+
 # Backups created by cc-config or manual edits
 *.bak
 *.bak-*
@@ -24,7 +29,7 @@
 .zsh_history
 .bash_history
 
-# Internal project memory (NOT for public). Only the root-level ones —
+# Internal project memory (NOT for public). Only the root-level ones -
 # `kernel/CLAUDE.md` is a legitimate part of the pack.
 /CLAUDE.md
 /WORKSTATE.md
