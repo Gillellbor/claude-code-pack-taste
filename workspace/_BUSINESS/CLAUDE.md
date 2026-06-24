@@ -1,14 +1,16 @@
 ---
 type: core
 title: "CLAUDE"
-status: active
-summary: ""
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+status: approved
+summary: "Directory structure for organizing personal business work including internal projects, education materials, research outputs, documentation, scripts and notes."
+created: 2026-06-13 00:00
+updated: 2026-06-13 00:00
+owner: Šimon Hradní
 client: ~
 path: workspace/_BUSINESS/CLAUDE.md
 tags: [agents-manifest]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>

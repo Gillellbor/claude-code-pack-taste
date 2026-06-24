@@ -1,14 +1,16 @@
 ---
 type: notes
 title: "subagent-rules"
-status: active
-summary: ""
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+status: approved
+summary: "Guidelines for dispatching parallel subagents to handle independent research and tasks while protecting main context from information bloat."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: kernel/rules/subagent-rules.md
 tags: [note]
+version: "1.0.0"
+release: latest
 ---
 
 <subagent_rules>

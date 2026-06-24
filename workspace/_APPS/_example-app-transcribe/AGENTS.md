@@ -1,14 +1,16 @@
 ---
 type: core
 title: "AGENTS"
-status: active
-summary: ""
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+status: approved
+summary: "Stub example app for transcribing local audio/video files to markdown using LLM API, requires implementation of actual API integration."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: workspace/_APPS/_example-app-transcribe/AGENTS.md
 tags: [agents-manifest]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>

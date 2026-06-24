@@ -1,14 +1,16 @@
 ---
 type: core
 title: "AGENTS"
-status: active
-summary: ""
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+status: approved
+summary: "Template for organizing client engagement documentation with knowledge base, meeting records, projects, and research assets."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: workspace/_CLIENTS/_example-client/AGENTS.md
 tags: [agents-manifest]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>

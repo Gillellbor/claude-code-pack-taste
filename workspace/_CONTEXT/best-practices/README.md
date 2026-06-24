@@ -1,14 +1,16 @@
 ---
 type: core
 title: "Best Practices"
-status: active
+status: approved
 summary: "One markdown file per topic. Capture *your* approach to recurring problems - distinct from generic online best practice."
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: workspace/_CONTEXT/best-practices/README.md
 tags: [readme]
+version: "1.0.0"
+release: latest
 ---
 
 # Best Practices

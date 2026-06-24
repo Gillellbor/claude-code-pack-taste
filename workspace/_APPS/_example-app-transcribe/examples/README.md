@@ -1,14 +1,16 @@
 ---
 type: core
 title: "Examples"
-status: active
+status: approved
 summary: "Drop input audio/video files here for testing."
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: workspace/_APPS/_example-app-transcribe/examples/README.md
 tags: [readme]
+version: "1.0.0"
+release: latest
 ---
 
 # Examples

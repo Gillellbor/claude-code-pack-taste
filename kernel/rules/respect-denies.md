@@ -1,14 +1,16 @@
 ---
 type: context
 title: "respect-denies"
-status: active
-summary: ""
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+status: approved
+summary: "Protocol for handling denied commands: stop immediately, inform user of the denial reason, provide exact copy-paste command they can run themselves, and wait for instruction."
+created: 2026-06-13 00:00
+updated: 2026-06-13 00:00
+owner: Šimon Hradní
 client: ~
 path: kernel/rules/respect-denies.md
 tags: [standard]
+version: "1.0.0"
+release: latest
 ---
 
 <respect_denies>

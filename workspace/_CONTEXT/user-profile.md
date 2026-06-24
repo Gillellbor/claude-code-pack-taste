@@ -1,14 +1,16 @@
 ---
 type: notes
 title: "User Profile"
-status: active
+status: approved
 summary: "Fill in your details. Claude reads this across all sessions to tailor work to you specifically. Keep it under 200 lines and update when material things change."
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: workspace/_CONTEXT/user-profile.md
 tags: [note]
+version: "1.0.0"
+release: latest
 ---
 
 # User Profile

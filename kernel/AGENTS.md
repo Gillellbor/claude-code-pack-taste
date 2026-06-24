@@ -1,14 +1,16 @@
 ---
 type: core
 title: "AGENTS"
-status: active
-summary: ""
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+status: approved
+summary: "Establishes global behavioral baseline for Claude Code across projects: intellectual collaboration, anti-hype pragmatism, root-cause fixing, safety boundaries, documentation standards."
+created: 2026-06-13 21:07
+updated: 2026-06-13 21:07
+owner: Šimon Hradní
 client: ~
 path: kernel/AGENTS.md
 tags: [agents-manifest]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>

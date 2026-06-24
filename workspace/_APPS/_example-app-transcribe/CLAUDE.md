@@ -1,14 +1,16 @@
 ---
 type: core
 title: "CLAUDE"
-status: active
-summary: ""
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+status: approved
+summary: "Stub example app for transcribing local audio/video files to markdown using an LLM API, requiring user implementation of actual API calls."
+created: 2026-06-13 00:00
+updated: 2026-06-13 00:00
+owner: Šimon Hradní
 client: ~
 path: workspace/_APPS/_example-app-transcribe/CLAUDE.md
 tags: [agents-manifest]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>

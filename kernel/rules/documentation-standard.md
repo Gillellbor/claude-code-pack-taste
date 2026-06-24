@@ -1,14 +1,16 @@
 ---
 type: context
 title: "documentation-standard"
-status: active
-summary: ""
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+status: approved
+summary: "Documentation standard defining XML/Markdown format, file structure (AGENTS.md, WORKSTATE.md, README.md), and mandatory rules for project tracking."
+created: 2026-06-13 21:07
+updated: 2026-06-13 21:07
+owner: Šimon Hradní
 client: ~
 path: kernel/rules/documentation-standard.md
 tags: [standard]
+version: "1.0.0"
+release: latest
 ---
 
 <documentation_standard>

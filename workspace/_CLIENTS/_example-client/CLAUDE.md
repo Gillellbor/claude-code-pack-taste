@@ -1,14 +1,16 @@
 ---
 type: core
 title: "CLAUDE"
-status: active
-summary: ""
-created: 2026-06-13
-updated: 2026-06-13
-created_by: Šimon Hradní
+status: approved
+summary: "Template document for organizing client engagement structure, knowledge management, and project documentation with folder hierarchy and processing workflows."
+created: 2026-06-13 00:00
+updated: 2026-06-13 00:00
+owner: Šimon Hradní
 client: ~
 path: workspace/_CLIENTS/_example-client/CLAUDE.md
 tags: [agents-manifest]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>

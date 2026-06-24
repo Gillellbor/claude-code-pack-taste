@@ -1,14 +1,16 @@
 ---
 type: notes
 title: "business-claude"
-status: active
-summary: ""
-created: 2026-05-13
-updated: 2026-05-13
-created_by: Šimon Hradní
+status: approved
+summary: "Directory structure for internal business work including projects, education, research, documentation, and scripts with specific naming conventions and documentation standards."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
 client: ~
 path: kernel/templates/business-claude.md
 tags: [note]
+version: "1.0.0"
+release: latest
 ---
 
 <purpose>
