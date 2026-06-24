@@ -1,3 +1,18 @@
+---
+type: core
+title: "AGENTS"
+status: approved
+summary: "Directory structure for organizing internal business work including projects, education materials, research, documentation, and personal scripts with consistent naming conventions."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: workspace/_BUSINESS/AGENTS.md
+tags: [agents-manifest]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 Your own business work — offers you produce, content you create, internal projects, education materials, your own tooling.
 

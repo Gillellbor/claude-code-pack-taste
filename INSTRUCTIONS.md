@@ -1,3 +1,18 @@
+---
+type: notes
+title: "Instructions for Claude - Pack Installation"
+status: approved
+summary: "You are reading this because the user just cloned the Claude Code Pack and ran `claude` in the repo root."
+created: 2026-06-16 00:52
+updated: 2026-06-16 16:59
+owner: Šimon Hradní
+client: ~
+path: INSTRUCTIONS.md
+tags: [note]
+version: "1.0.0"
+release: latest
+---
+
 # Instructions for Claude - Pack Installation
 
 You are reading this because the user just cloned the Claude Code Pack and ran `claude` in the repo root. Your job is to walk them through installation **safely and interactively**, with explicit confirmation at every major step. Treat the user as a smart power-user who hasn't done this before - explain what each step does, ask before touching anything outside the repo, and respect their preferences (path, OS, names).
@@ -215,16 +230,16 @@ Contents going in:
 - `settings.json` - restrictive baseline; bypass mode locked off
 - `AGENTS.md` + `CLAUDE.md` (symlink)
 - `statusline.sh` - 3-line status bar (model · cost / project · ctx / 5h · 7d rate limits)
-- `rules/` - five rules (documentation, respect-denies, subagents, notes, language)
+- `rules/` - six rules (documentation, frontmatter-standard, respect-denies, subagents, notes, language)
 - `scripts/list-env-keys.sh` - lets Claude see *names* of credential env vars without values
 - `hooks/`:
   - `bash-safety-extended.py` (PreToolUse Bash) - blocks bypass patterns
   - `context-bloat-guard.py` (PreToolUse Read) - soft brake on huge file reads
   - `notes-research.sh` (PostToolUse Edit/Write) - auto-research on `notes.md` markers
   - `inject-current-time.sh` (UserPromptSubmit) - current time in every prompt
-- `skills/setup/`, `skill-creator/`, `prd-creator/`, `dr-prompt/`, `client-data-check/`
+- `skills/setup/`, `skill-creator/`, `prd-creator/`, `dr-prompt/`, `client-data-check/`, `idea-file-creator/`
 - `templates/` - five scaffolding templates: klient, dev, business, app, general
-- `agents/` - empty placeholder + README
+- `agents/` - `prompt-engineer`, `research-analyst` + README
 
 **Critical - existing setup: analyze, recommend, don't overwrite.** If `~/.claude/settings.json` (or a `rules/`/`hooks/` directory) already existed in the backup, do NOT blindly replace it. First read the user's existing config - permissions, hooks, env, rules - and compare it against what this pack ships. Then present a tailored, area-by-area recommendation: what of theirs is worth keeping, what the pack adds that's worth adopting, where the two overlap or conflict, and a suggested result tuned to how this user actually works (ask briefly if it's not obvious). The user decides per area; then write the agreed result. Replace wholesale only if there is nothing meaningful there or they ask for it. The backup protects the original either way - the install never auto-merges JSON, so the merged result is written explicitly.
 
@@ -359,9 +374,9 @@ Show how the env-keys helper works:
 
 Their `ANTHROPIC_API_KEY` (and any other credentials they added) should appear by name. Values never appear in the output.
 
-### The one readable exception - `.env.local`
+### The one readable env file - `.env.shared`
 
-`~/.claude/.env` above is the GLOBAL credential store for hooks; Claude never reads its values. For handing Claude a secret **inside a specific project**, the convention is a per-project `.env.local` - the single file whose values Claude is allowed to read. The deny rules plus the `bash-safety-extended.py` hook block reading every other `.env` / `.env.*` (via `cat`, `source`, redirection, `python -c`, docker bind-mount, or the Read tool); `.env.local` is the deliberate, conscious exception, created on purpose only when Claude genuinely needs a key or token. It stays gitignored via the `.env.*` pattern, so it is never committed. To see only the key NAMES of any other env file, Claude runs `~/.claude/scripts/list-env-keys.sh --from <path>`. Scope note: only commands that read the *values* into view are blocked (`cat`, `source`, redirection, `python -c ...read()`); passing the file as config (`--env-file`), copying a template, or mentioning it in text all pass, so deploys and setup are not blocked.
+`~/.claude/.env` above is the GLOBAL credential store for hooks; Claude never reads its values. The model has three tiers: the global `~/.claude/.env` and every project `.env` / `.env.local` / `.env.production` / `.env.*` are HARD - Claude never reads their values (`.env.local` is HARD on purpose; the JS ecosystem treats it as the live-secret file, so live keys land there). The single readable env file is **`.env.shared`** - the soft tier for low-risk values safe to surface (a notify webhook, a contact email). The deny rules plus the `bash-safety-extended.py` hook block reading every HARD `.env` / `.env.*` (via `cat`, `source`, redirection, `python -c`, docker bind-mount, or the Read tool). A real secret is never read by Claude - a program uses it without revealing the value. To see only the key NAMES of any HARD env file, Claude runs `~/.claude/scripts/list-env-keys.sh --from <path>` (add `--classify` for each key's state). Scope note: only commands that read the *values* into view are blocked (`cat`, `source`, redirection, `python -c ...read()`); passing the file as config (`--env-file`), copying a template, or mentioning it in text all pass, so deploys and setup are not blocked.
 
 ---
 
@@ -387,7 +402,7 @@ Offer to pre-trust the workspace base path from Step 2 and each directory create
 Tell the user to **restart their Claude Code session** so the new `settings.json` takes effect. After restart, they can verify:
 
 - `~/.claude/scripts/list-env-keys.sh` returns env var names without values
-- A denied command (e.g. asking Claude to `cat .env`) gets blocked, but a deliberate `.env.local` is readable (the single secret-handoff exception)
+- A denied command (e.g. asking Claude to `cat .env`) gets blocked, but a deliberate `.env.shared` is readable (the single readable soft tier)
 - Bypass mode is off - `claude --permission-mode bypassPermissions` should refuse
 - The current-time injection works - at session start, Claude should know the actual time
 - Statusline appears at the bottom with model · cost · context · rate-limit info

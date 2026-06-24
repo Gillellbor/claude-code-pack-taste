@@ -1,3 +1,18 @@
+---
+type: notes
+title: "klient-claude"
+status: approved
+summary: "Client project template and directory structure for managing engagements, knowledge bases, meetings, deliverables, and work tracking."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: kernel/templates/klient-claude.md
+tags: [note]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 Client project: {{CLIENT_NAME}}
 {{ONE_LINE_DESCRIPTION}}

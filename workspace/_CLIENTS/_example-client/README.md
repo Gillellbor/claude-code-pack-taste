@@ -1,3 +1,18 @@
+---
+type: core
+title: "{{CLIENT_NAME}}"
+status: approved
+summary: "Created: YYYY-MM-DD"
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: workspace/_CLIENTS/_example-client/README.md
+tags: [readme]
+version: "1.0.0"
+release: latest
+---
+
 # {{CLIENT_NAME}}
 
 Created: YYYY-MM-DD

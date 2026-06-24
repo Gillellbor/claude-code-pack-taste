@@ -1,3 +1,18 @@
+---
+type: notes
+title: "dev-claude"
+status: approved
+summary: "A project documentation template establishing standard format for purpose, status, architecture, local development setup, and feature documentation guidelines."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: kernel/templates/dev-claude.md
+tags: [note]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 {{PROJECT_NAME}}: {{ONE_LINE_DESCRIPTION}}
 </purpose>

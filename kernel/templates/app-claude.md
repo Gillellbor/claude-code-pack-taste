@@ -1,3 +1,18 @@
+---
+type: notes
+title: "app-claude"
+status: approved
+summary: "Template document for documenting app purpose, product status, architecture, usage, and feature documentation structure."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: kernel/templates/app-claude.md
+tags: [note]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 {{APP_NAME}}: {{ONE_LINE_DESCRIPTION}}
 Purpose: {{WHO_IS_IT_FOR_AND_WHY}}

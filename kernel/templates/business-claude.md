@@ -1,3 +1,18 @@
+---
+type: notes
+title: "business-claude"
+status: approved
+summary: "Directory structure for internal business work including projects, education, research, documentation, and scripts with specific naming conventions and documentation standards."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: kernel/templates/business-claude.md
+tags: [note]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 {{BUSINESS_CONTEXT}}: your own business work — offers you produce, content you create, internal projects, education materials, your own tooling.
 

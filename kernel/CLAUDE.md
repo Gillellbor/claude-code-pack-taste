@@ -1,3 +1,18 @@
+---
+type: core
+title: "CLAUDE"
+status: approved
+summary: "Global behavioral baseline for Claude Code defining persona, work principles, safety boundaries, and documentation standards across all projects."
+created: 2026-06-13 21:07
+updated: 2026-06-13 21:07
+owner: Šimon Hradní
+client: ~
+path: kernel/CLAUDE.md
+tags: [agents-manifest]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 Global behavioral baseline for Claude Code, applied across all projects on this machine.
 

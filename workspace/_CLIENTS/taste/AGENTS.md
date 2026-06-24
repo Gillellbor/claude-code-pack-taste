@@ -1,3 +1,18 @@
+---
+type: core
+title: "AGENTS"
+status: approved
+summary: "Project documentation template for Taste client engagement, defining directory structure, knowledge management workflows, and operational constraints."
+created: 2026-06-13 00:00
+updated: 2026-06-13 00:00
+owner: Šimon Hradní
+client: ~
+path: workspace/_CLIENTS/taste/AGENTS.md
+tags: [agents-manifest]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 Client project: Taste
 {{ONE_LINE_DESCRIPTION}}

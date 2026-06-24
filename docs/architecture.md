@@ -1,3 +1,18 @@
+---
+type: context
+title: "Architecture"
+status: approved
+summary: "How the starter pack is laid out and why each piece exists."
+created: 2026-05-13 12:08
+updated: 2026-05-13 12:08
+owner: Šimon Hradní
+client: ~
+path: docs/architecture.md
+tags: [handbook]
+version: "1.0.0"
+release: latest
+---
+
 # Architecture
 
 How the starter pack is laid out and why each piece exists.

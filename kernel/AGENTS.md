@@ -1,3 +1,18 @@
+---
+type: core
+title: "AGENTS"
+status: approved
+summary: "Establishes global behavioral baseline for Claude Code across projects: intellectual collaboration, anti-hype pragmatism, root-cause fixing, safety boundaries, documentation standards."
+created: 2026-06-13 21:07
+updated: 2026-06-13 21:07
+owner: Šimon Hradní
+client: ~
+path: kernel/AGENTS.md
+tags: [agents-manifest]
+version: "1.0.0"
+release: latest
+---
+
 <purpose>
 Global behavioral baseline for Claude Code, applied across all projects on this machine.
 
