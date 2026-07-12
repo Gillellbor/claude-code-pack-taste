@@ -233,7 +233,7 @@ Contents going in:
 - `rules/` - six rules (documentation, frontmatter-standard, respect-denies, subagents, notes, language)
 - `scripts/list-env-keys.sh` - lets Claude see *names* of credential env vars without values
 - `hooks/`:
-  - `bash-safety-extended.py` (PreToolUse Bash) - blocks bypass patterns
+  - `safety/safety_check.py` (PreToolUse Bash+Read) - blocks bypass patterns and protected env reads; shared by all tool adapters
   - `context-bloat-guard.py` (PreToolUse Read) - soft brake on huge file reads
   - `notes-research.sh` (PostToolUse Edit/Write) - auto-research on `notes.md` markers
   - `inject-current-time.sh` (UserPromptSubmit) - current time in every prompt
@@ -247,7 +247,7 @@ Execute the copy:
 
 ```bash
 cp -r kernel/. ~/.claude/
-chmod +x ~/.claude/scripts/*.sh ~/.claude/hooks/*.{sh,py} ~/.claude/statusline.sh
+chmod +x ~/.claude/scripts/*.sh ~/.claude/hooks/*.{sh,py} ~/.claude/safety/*.py ~/.claude/statusline.sh
 ```
 
 Re-create the `~/.claude/CLAUDE.md` symlink (it may not have copied as a symlink):
