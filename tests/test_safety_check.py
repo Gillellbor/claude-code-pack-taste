@@ -57,3 +57,40 @@ def test_read_allows_env_example():
 
 def test_read_allows_ordinary_file():
     assert sc.check_file_read("/proj/config.py") is None
+
+
+import json, subprocess
+
+SCRIPT = os.path.join(os.path.dirname(__file__), "..", "kernel", "safety", "safety_check.py")
+
+def _run(payload, tool="claude"):
+    return subprocess.run(
+        ["python3", SCRIPT, "--tool", tool],
+        input=json.dumps(payload), capture_output=True, text=True,
+    )
+
+def test_normalize_claude_bash():
+    assert sc.normalize_claude(
+        {"tool_name": "Bash", "tool_input": {"command": "rm -rf /tmp/x"}}
+    ) == ("command", "rm -rf /tmp/x")
+
+def test_normalize_claude_read():
+    assert sc.normalize_claude(
+        {"tool_name": "Read", "tool_input": {"file_path": "/p/.env"}}
+    ) == ("read", "/p/.env")
+
+def test_normalize_claude_other_tool_ignored():
+    assert sc.normalize_claude({"tool_name": "Glob", "tool_input": {}}) is None
+
+def test_main_blocks_rm_rf_end_to_end():
+    r = _run({"tool_name": "Bash", "tool_input": {"command": "cd b && rm -rf ."}})
+    assert r.returncode == 2
+    assert "BLOCKED" in r.stderr
+
+def test_main_allows_ls_end_to_end():
+    r = _run({"tool_name": "Bash", "tool_input": {"command": "ls -la"}})
+    assert r.returncode == 0
+
+def test_main_blocks_env_read_end_to_end():
+    r = _run({"tool_name": "Read", "tool_input": {"file_path": "/p/.env"}})
+    assert r.returncode == 2

@@ -240,3 +240,67 @@ def check_file_read(file_path):
         "(add --classify for state), or read `.env.shared`."
         % (os.path.basename(file_path), HELPER, file_path)
     )
+
+
+def normalize_claude(data):
+    """Claude Code hook JSON -> ('command', cmd) | ('read', path) | None."""
+    tool = data.get("tool_name")
+    tool_input = data.get("tool_input", {}) or {}
+    if tool == "Bash":
+        cmd = tool_input.get("command", "")
+        return ("command", cmd) if cmd else None
+    if tool == "Read":
+        fp = tool_input.get("file_path", "") or ""
+        return ("read", fp) if fp else None
+    return None
+
+
+NORMALIZERS = {
+    "claude": normalize_claude,
+    # later plans register: "codex", "cursor", "antigravity"
+}
+
+
+def emit_block(tool, reason, command=None):
+    """Write the tool-appropriate block signal and exit non-zero."""
+    if tool == "cursor":
+        # Cursor hooks read a JSON verdict on stdout (added in the Cursor adapter plan).
+        print(json.dumps({"permission": "deny", "user_message": reason}))
+        sys.exit(0)
+    # Claude Code + Codex: stderr message + exit code 2.
+    print(f"BLOCKED by safety hook: {reason}", file=sys.stderr)
+    if command:
+        print(f"Command: {command}", file=sys.stderr)
+    print("This is a hard safety boundary. Do NOT retry with a workaround.", file=sys.stderr)
+    sys.exit(2)
+
+
+def _parse_tool_arg(argv):
+    if "--tool" in argv:
+        i = argv.index("--tool")
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return "claude"
+
+
+def main():
+    tool = _parse_tool_arg(sys.argv)
+    normalize = NORMALIZERS.get(tool, normalize_claude)
+    try:
+        data = json.load(sys.stdin)
+    except (json.JSONDecodeError, ValueError):
+        sys.exit(0)
+
+    norm = normalize(data)
+    if norm is None:
+        sys.exit(0)
+    kind, payload = norm
+
+    reason = check_command(payload) if kind == "command" else check_file_read(payload)
+    if reason:
+        emit_block(tool, reason, payload if kind == "command" else None)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
