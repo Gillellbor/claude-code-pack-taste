@@ -219,3 +219,24 @@ def check_command(command):
             return why
 
     return None
+
+
+def check_file_read(file_path):
+    """Pure decision: block reading a protected env file's values, else None.
+
+    Mirrors the Claude Code Read-tool branch: .env / .env.* are hard-protected
+    except the soft .env.shared and placeholder (.example/.sample/.template/.dist)
+    files. Non-env paths are always allowed here.
+    """
+    if not file_path:
+        return None
+    base = os.path.basename(file_path).lower()
+    if base != ".env" and not base.startswith(".env."):
+        return None
+    if _env_read_ok(base):
+        return None
+    return (
+        "reading a protected env file (%s) - use `%s --from %s` for key NAMES only "
+        "(add --classify for state), or read `.env.shared`."
+        % (os.path.basename(file_path), HELPER, file_path)
+    )

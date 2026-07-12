@@ -41,3 +41,19 @@ def test_blocks_curl_pipe_sh():
 # --- check_command: sensitive file reads via bash ---
 def test_blocks_reading_ssh_key():
     assert sc.check_command("cat ~/.ssh/id_rsa") is not None
+
+
+def test_read_blocks_dotenv():
+    assert sc.check_file_read("/proj/.env") is not None
+
+def test_read_blocks_dotenv_local():
+    assert sc.check_file_read("/proj/.env.local") is not None
+
+def test_read_allows_env_shared():
+    assert sc.check_file_read("/proj/.env.shared") is None
+
+def test_read_allows_env_example():
+    assert sc.check_file_read("/proj/.env.production.example") is None
+
+def test_read_allows_ordinary_file():
+    assert sc.check_file_read("/proj/config.py") is None
