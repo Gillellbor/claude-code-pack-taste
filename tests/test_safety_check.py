@@ -94,3 +94,97 @@ def test_main_allows_ls_end_to_end():
 def test_main_blocks_env_read_end_to_end():
     r = _run({"tool_name": "Read", "tool_input": {"file_path": "/p/.env"}})
     assert r.returncode == 2
+
+
+# --- POLICY_DENY: canonical hard-deny command patterns (parity for tools with no native deny) ---
+def test_blocks_sudo():
+    assert sc.check_command("sudo apt install foo") is not None
+
+def test_blocks_sudo_chained():
+    assert sc.check_command("cd /x && sudo systemctl restart y") is not None
+
+def test_blocks_chmod_recursive():
+    assert sc.check_command("chmod -R 755 dir") is not None
+
+def test_blocks_chmod_777():
+    assert sc.check_command("chmod 777 file") is not None
+
+def test_blocks_chown():
+    assert sc.check_command("chown root:root file") is not None
+
+def test_blocks_git_push_force_long():
+    assert sc.check_command("git push origin main --force") is not None
+
+def test_blocks_git_push_force_short():
+    assert sc.check_command("git push -f") is not None
+
+def test_blocks_git_reset_hard():
+    assert sc.check_command("git reset --hard HEAD~1") is not None
+
+def test_blocks_git_clean_force():
+    assert sc.check_command("git clean -fd") is not None
+
+def test_blocks_git_branch_delete_force():
+    assert sc.check_command("git branch -D feature") is not None
+
+def test_blocks_git_commit_no_verify():
+    assert sc.check_command("git commit --no-verify -m x") is not None
+
+def test_blocks_npm_publish():
+    assert sc.check_command("npm publish") is not None
+
+def test_blocks_npm_install_global():
+    assert sc.check_command("npm install -g typescript") is not None
+
+def test_blocks_pkill():
+    assert sc.check_command("pkill node") is not None
+
+def test_blocks_shutdown():
+    assert sc.check_command("shutdown -h now") is not None
+
+def test_blocks_launchctl():
+    assert sc.check_command("launchctl unload foo") is not None
+
+def test_blocks_mv_force():
+    assert sc.check_command("mv -f a b") is not None
+
+
+# --- POLICY_DENY: no false positives on safe forms (case-sensitive flag matching) ---
+def test_allows_git_push_plain():
+    assert sc.check_command("git push origin main") is None
+
+def test_allows_git_branch_delete_safe():
+    # lowercase -d is the safe merged-branch delete; must NOT be caught like -D
+    assert sc.check_command("git branch -d merged") is None
+
+def test_allows_git_reset_soft():
+    assert sc.check_command("git reset HEAD~1") is None
+
+def test_allows_git_commit_plain():
+    assert sc.check_command("git commit -m 'a message'") is None
+
+def test_allows_npm_install_local():
+    assert sc.check_command("npm install") is None
+
+def test_allows_chmod_plain():
+    assert sc.check_command("chmod 644 file") is None
+
+
+# --- SENSITIVE_READ: native file reads of credential paths (not only .env) ---
+def test_read_blocks_ssh_key():
+    assert sc.check_file_read("/home/u/.ssh/id_rsa") is not None
+
+def test_read_blocks_aws_creds():
+    assert sc.check_file_read("/Users/u/.aws/credentials") is not None
+
+def test_read_blocks_kube_config():
+    assert sc.check_file_read("/home/u/.kube/config") is not None
+
+def test_read_blocks_gh_hosts():
+    assert sc.check_file_read("/home/u/.config/gh/hosts.yml") is not None
+
+def test_read_blocks_npmrc():
+    assert sc.check_file_read("/home/u/.npmrc") is not None
+
+def test_read_allows_ordinary_source():
+    assert sc.check_file_read("/home/u/project/main.py") is None
