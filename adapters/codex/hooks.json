@@ -1,0 +1,16 @@
+{
+  "_comment": "Codex CLI hook wiring - Taste starter pack adapter. Routes every PreToolUse event through codex_safety_hook.py, which loads the shared kernel/safety/safety_check.py brain and blocks the same core dangers Claude Code and the other adapters block (see kernel/safety/safety-policy.md). ASSUMPTION: Codex's exact hooks.json schema was not fully published as of the 2026-07-08 research snapshot (docs/tool-agnostic-research-2026-07-08.md, 'Codex CLI' section) beyond 'events map ~1:1 to Claude Code's'. This file therefore mirrors Claude Code's settings.json hooks shape (matcher + hooks[].type/command) as the closest documented analog. A single wildcard matcher is used deliberately: the hook script itself inspects the payload to decide whether it found a shell command or a file-read path (see codex_safety_hook.py's normalize_codex), so it does not depend on the matcher discriminating tool type correctly. If an installed Codex version instead reads hooks from '[[hooks.PreToolUse]]' tables inside config.toml rather than a standalone hooks.json, port the same command line into that form - see install-notes.md.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.codex/safety/codex_safety_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}

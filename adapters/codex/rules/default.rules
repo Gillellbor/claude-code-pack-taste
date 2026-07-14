@@ -1,0 +1,105 @@
+# Codex CLI "Rules" - Taste starter pack adapter.
+#
+# Starlark command-execution deny-list. This is Codex's native/bonus deterministic layer -
+# the direct analog to Claude Code's kernel/settings.json `deny` array. It mirrors that
+# array's command patterns (plus the matching entries in kernel/safety/safety-policy.md) as
+# closely as the Rules mechanism allows. Canonical source: kernel/settings.json +
+# kernel/safety/safety-policy.md - this file derives from those, it does not define new
+# policy.
+#
+# MECHANISM AND LIMITS (read before editing anything below):
+#   - `prefix_rule(pattern=[...], decision=...)` matches when the command Codex is about to
+#     run parses to an argv that BEGINS with the exact token sequence in `pattern`. There is
+#     no substring, regex, or "flag anywhere in the argv" match - only a literal prefix.
+#     Claude Code patterns like `git push *--force*` (force flag placed after other args,
+#     e.g. `git push origin --force`) can only be PARTIALLY mirrored this way; see the git
+#     section below for the specific gap.
+#   - Decisions are allow / prompt / forbidden; most-restrictive wins when rules overlap.
+#     Every entry below uses decision="forbidden" - a hard, silent block, matching Claude
+#     Code's `deny` tier (not `ask` - nothing here is a command Šimon should be able to
+#     approve case-by-case).
+#   - Rules splits compound commands on `&&`, `||`, `;`, `|` and evaluates each segment, but
+#     a command that hides its real payload behind shell substitution, a variable, or an
+#     embedded `bash -c "..."` string is opaque to Rules as a single top-level invocation and
+#     can dodge every prefix below. This is a documented Codex limitation, not a bug in this
+#     file - see PARITY.md.
+#   - Rules is SCOPED TO COMMAND EXECUTION ONLY. It has no mechanism to block a file-path
+#     read - Claude Code's `Read(~/.ssh/**)`, `Read(~/.aws/**)`, `Read(**/.env)` etc. denies
+#     have NO Rules equivalent in this file at all. That protection, where it exists for
+#     Codex, rides entirely on `codex_safety_hook.py` (see PARITY.md for exactly how much of
+#     it that covers).
+#   - Test any change with `codex execpolicy check` before trusting it.
+#   - Source: docs/tool-agnostic-research-2026-07-08.md, "Codex CLI" section, and
+#     https://developers.openai.com/codex/rules
+#
+# Backstop: `codex_safety_hook.py` wires the shared `kernel/safety/safety_check.py` brain
+# into Codex's PreToolUse hook. That brain independently catches recursive+forced `rm`
+# ANYWHERE in a chained command (not just at argv[0]), env-value reads, curl|sh /
+# wget|sh, sensitive-file cat, dd/mkfs/fdisk-on-device, and dangerous docker flags -
+# regardless of prefix position. It does NOT backstop git push --force, git reset --hard,
+# chmod, chown, sudo, npm publish/-g, pkill, shutdown/reboot/halt - those are Claude-native
+# `settings.json`-only conveniences today (not in safety_check.py's DANGEROUS list either),
+# so for Codex they exist ONLY as Rules entries below, with no hook-level second layer.
+
+# --- destructive filesystem ---------------------------------------------------
+prefix_rule(pattern=["rm", "-r"], decision="forbidden")
+prefix_rule(pattern=["rm", "-R"], decision="forbidden")
+prefix_rule(pattern=["rm", "-rf"], decision="forbidden")
+prefix_rule(pattern=["rm", "-rR"], decision="forbidden")
+prefix_rule(pattern=["rm", "-fr"], decision="forbidden")
+prefix_rule(pattern=["rm", "-fR"], decision="forbidden")
+prefix_rule(pattern=["mv", "-f"], decision="forbidden")
+
+# --- privilege / permission escalation ----------------------------------------
+prefix_rule(pattern=["sudo"], decision="forbidden")
+prefix_rule(pattern=["chmod", "-R"], decision="forbidden")
+prefix_rule(pattern=["chmod", "777"], decision="forbidden")
+prefix_rule(pattern=["chmod", "666"], decision="forbidden")
+prefix_rule(pattern=["chmod", "+s"], decision="forbidden")
+prefix_rule(pattern=["chown"], decision="forbidden")
+
+# --- disk / filesystem format --------------------------------------------------
+# ASSUMPTION: this only catches the bare `mkfs` binary. The real-world family (mkfs.ext4,
+# mkfs.xfs, mkfs.vfat, mkfs.ntfs, mkfs.btrfs, ...) is a DIFFERENT argv[0] string per
+# filesystem type, so a single "mkfs" prefix token will not match "mkfs.ext4 /dev/sdb1".
+# Rules has no wildcard/regex token matching (see mechanism note above), so the dotted
+# forms are a documented Rules gap. The hook backstops them via safety_check.py's regex
+# `mkfs\.[a-z0-9]+\s+/dev/`.
+prefix_rule(pattern=["mkfs"], decision="forbidden")
+
+# ASSUMPTION: `dd if=/dev/sda` parses as argv ["dd", "if=/dev/sda"] - one token, because
+# "if=" and the path are not separated by a space. A prefix rule only matches a COMPLETE
+# token, so pattern=["dd", "if="] would NOT match a real invocation; it is not included for
+# that reason. The safe, actually-working equivalent is to forbid `dd` outright:
+prefix_rule(pattern=["dd"], decision="forbidden")
+# This is intentionally BROADER than the canonical policy, which only targets `dd` writing
+# to a physical device via if=/of= (kernel/safety/safety-policy.md item 7). Rules cannot
+# express "only when if=/of= targets /dev/*" at the prefix-token level, so the wider block
+# is accepted here in favor of safety. safety_check.py still carries the precise
+# if=/of=-to-device regex as the backstop for any case where this file is bypassed
+# (e.g. a nested or opaque shell invocation Rules never sees).
+
+# --- git safety net -------------------------------------------------------------
+prefix_rule(pattern=["git", "push", "--force"], decision="forbidden")
+prefix_rule(pattern=["git", "push", "-f"], decision="forbidden")
+# GAP: Claude Code's deny also covers `git push origin --force` (flag NOT at argv
+# position 2) via wildcard patterns `git push *--force*` / `git push *-f *`. Rules'
+# prefix-only matching cannot express "flag anywhere in argv" - a force-push where the
+# remote is named before the flag is a documented gap in this file, not caught anywhere
+# else for Codex either (safety_check.py has no force-push check).
+prefix_rule(pattern=["git", "reset", "--hard"], decision="forbidden")
+prefix_rule(pattern=["git", "clean", "-f"], decision="forbidden")
+prefix_rule(pattern=["git", "clean", "-d"], decision="forbidden")
+prefix_rule(pattern=["git", "branch", "-D"], decision="forbidden")
+prefix_rule(pattern=["git", "commit", "--no-verify"], decision="forbidden")
+
+# --- package publishing / global installs --------------------------------------
+prefix_rule(pattern=["npm", "publish"], decision="forbidden")
+prefix_rule(pattern=["npm", "install", "-g"], decision="forbidden")
+prefix_rule(pattern=["npm", "install", "--global"], decision="forbidden")
+
+# --- process / system control ---------------------------------------------------
+prefix_rule(pattern=["pkill"], decision="forbidden")
+prefix_rule(pattern=["shutdown"], decision="forbidden")
+prefix_rule(pattern=["reboot"], decision="forbidden")
+prefix_rule(pattern=["halt"], decision="forbidden")

@@ -1,0 +1,44 @@
+# Codex CLI configuration - Taste starter pack adapter.
+#
+# Claude Code is this pack's canonical source of truth (see kernel/AGENTS.md,
+# kernel/settings.json, kernel/safety/safety-policy.md). This file derives Codex's own
+# settings to sit as close to that reference as Codex's mechanism allows - see
+# adapters/codex/PARITY.md for exactly what matches, what is narrower, and why.
+#
+# AGENTS.md discovery (behavioral baseline - NOT set in this file):
+# Codex reads ~/.codex/AGENTS.md (global) plus AGENTS.md at the repo root and every
+# intermediate directory, concatenated with the more specific file winning on conflict.
+# This pack's one canonical behavioral baseline is kernel/AGENTS.md - the same content
+# Claude Code reads through its CLAUDE.md symlink. The bootstrap installer copies
+# kernel/AGENTS.md to ~/.codex/AGENTS.md (see install-notes.md); this config.toml only
+# carries execution-safety settings, it does not duplicate AGENTS.md's behavioral content.
+#
+# Source: docs/tool-agnostic-research-2026-07-08.md, "Codex CLI" section, and
+# https://developers.openai.com/codex/config-reference
+
+# sandbox_mode: the OS-level execution boundary Codex enforces natively, independent of
+# Rules or hooks (Seatbelt on macOS / bwrap+seccomp on Linux / native sandbox on Windows).
+#   - "read-only"        : Codex can read files; no writes, no shell side effects.
+#   - "workspace-write"  : Codex can write inside the workspace root; everything else is
+#                           read-only. Pack default - mirrors Claude Code's Edit(*)/Write(*)
+#                           allow being scoped to the project, not the whole filesystem.
+#   - "danger-full-access": no sandbox at all. Never use this as a pack default.
+sandbox_mode = "workspace-write"
+
+# approval_policy: when Codex must stop and ask a human before running a command.
+#   - "untrusted"  : ask before almost everything.
+#   - "on-request" : Codex judges case-by-case whether to ask. Pack default - the closest
+#                     analog to Claude Code's "ask" tier (install-class, network-reaching,
+#                     and destructive-adjacent commands prompt; routine read/build/git
+#                     commands do not nag).
+#   - "never"      : never ask. Do not use as a pack default.
+approval_policy = "on-request"
+
+[sandbox_workspace_write]
+# Network access is OFF by default. Claude Code's baseline keeps network-reaching commands
+# (curl, wget, scp, rsync, git push) in its "ask" tier rather than unconditional "allow" -
+# this is the closest Codex equivalent to that stance for the whole sandbox.
+network_access = false
+# writable_roots intentionally left unset: Codex then defaults to the current workspace
+# root only. Do not widen this to "/" or a home directory - that would grant write access
+# far beyond what Claude Code's Edit(*)/Write(*) allow was scoped to.
