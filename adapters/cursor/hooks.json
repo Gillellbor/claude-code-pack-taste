@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python3 ~/.cursor/safety/cursor_safety_hook.py",
+        "timeout": 5,
+        "failClosed": true
+      }
+    ],
+    "beforeReadFile": [
+      {
+        "command": "python3 ~/.cursor/safety/cursor_safety_hook.py",
+        "timeout": 5,
+        "failClosed": true
+      }
+    ]
+  }
+}
