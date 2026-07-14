@@ -64,8 +64,9 @@ Cross-cutting, catches these regardless of where in a chained/compound command t
 5. Subshell/eval bypasses carrying a destructive command (`bash -c "...rm -rf..."`, `eval
    "...sudo..."`, `python -c` invoking `os.system`/`shutil.rmtree`/sensitive paths).
 6. Reading `~/.ssh` keys, `~/.aws/credentials`, `~/.gnupg`, `~/.git-credentials`, browser
-   cookie/session stores - **only when read via a bash command** (`cat`, `less`, `grep`,
-   etc.). See the file-read gap below.
+   cookie/session stores when read via a bash command (`cat`, `less`, `grep`, etc.).
+   Native (non-bash) reads of these paths are now covered too via `check_file_read` -
+   see the file-read note below.
 7. `dd` to a physical device, `mkfs.*` on a device, `fdisk /dev/*`, fork bombs.
 8. Dangerous docker flags: host-root mount (`-v /:/`), `--privileged`, mounting a sensitive
    host path (`.ssh`/`.aws`/`.gnupg`/`.kube`/`.docker`/`.config/gh`).
@@ -73,9 +74,9 @@ Cross-cutting, catches these regardless of where in a chained/compound command t
 ## Documented coverage gaps (Codex-specific)
 
 - **Rules is prefix-only.** `git push origin --force` (force flag not at argv position 2)
-  is not caught by `git push --force` / `git push -f` prefix rules, and the shared hook has
-  no force-push check either (it is not in `safety_check.py`'s DANGEROUS list - that check
-  is Claude-`settings.json`-native only, same limitation Claude Code itself has today).
+  is not caught by the `git push --force` / `git push -f` prefix rules - but the shared
+  hook now catches it: `safety_check.py`'s POLICY_DENY matches `git push ... --force` with
+  the force flag anywhere in the push command, so this Rules gap is backstopped, not open.
 - **`mkfs` family.** Only the bare `mkfs` binary is a Rules prefix match; `mkfs.ext4`,
   `mkfs.xfs`, etc. are different `argv[0]` strings Rules cannot generically match. The hook
   backstops the dotted forms via `safety_check.py`'s `mkfs\.[a-z0-9]+\s+/dev/` regex.
@@ -87,19 +88,17 @@ Cross-cutting, catches these regardless of where in a chained/compound command t
   WebSearch / other non-shell tools are not covered either. Edits are only partially
   covered. Neither this hook nor `rules/default.rules` can enforce anything against a call
   Codex itself never routes through a hookable mechanism.
-- **File-path reads are a real gap, not just a documented one.** Rules is scoped to command
-  execution only - it has zero mechanism to block a file-path read. `safety_check.py`'s
-  `check_file_read` only protects `.env` / `.env.*` files (mirroring Claude Code's own
-  `Read` hook branch exactly). Claude Code's *additional* protection for `~/.ssh/**`,
-  `~/.aws/**`, `~/.gnupg/**`, browser cookie stores, keychains, etc. when read via a
-  **native** Read-style tool (not bash) lives entirely in `settings.json`'s `deny` array -
-  a Claude-native permission-engine feature Codex's Rules mechanism cannot express at all
-  (see the mechanism note in `rules/default.rules`). For Codex, those same sensitive paths
-  are protected only when accessed **via a bash command** (covered by item 6 above); if
-  Codex has (or gains) a native, non-shell file-read tool, reading `~/.ssh/id_rsa` through
-  it directly is currently **unprotected** for Codex. This is the single largest real gap
-  in this adapter and should be re-verified once Codex's native read-tool behavior is
-  confirmed hands-on.
+- **File-path reads (formerly the largest gap, now closed in the shared core).** Rules is
+  scoped to command execution only - it has zero mechanism to block a file-path read. The
+  shared `safety_check.py`'s `check_file_read` now blocks native reads of sensitive
+  credential paths (`~/.ssh/**`, `~/.aws/**`, `~/.gnupg/**`, `~/.azure`, `~/.kube`,
+  `~/.config/gh`, `.git-credentials`, `.docker/config.json`, `.npmrc`, `.pypirc`, macOS
+  keychains, browser stores) in addition to `.env` values - its SENSITIVE_READ list mirrors
+  Claude Code's `settings.json` `Read()` denies. So if Codex routes a native file read
+  through the hookable read event, `~/.ssh/id_rsa` is blocked. Residual caveat: this depends
+  on Codex actually routing native reads through a hookable event AND on
+  `codex_safety_hook.py`'s file-path extraction matching Codex's real payload (an assumption,
+  see below) - re-verify hands-on.
 - **Codex hook JSON schema is an educated guess.** `codex_safety_hook.py`'s field-extraction
   paths (`COMMAND_PATHS`, `FILE_PATH_PATHS`) are assumptions, clearly marked in that file's
   docstring, because the exact PreToolUse payload shape was not published in the research

@@ -38,6 +38,13 @@ Cursor version drops the event, the process crashes before checking in), there
 is nothing else in Cursor stopping a destructive command or a secret-value read
 - only the classifier, which is explicitly not a security boundary.
 
+Because the hook is Cursor's only deterministic layer, the shared core carries the
+FULL canonical policy for it, not just the bypass-detection subset: `safety_check.py`'s
+POLICY_DENY (sudo, chmod -R, chown, git push --force, git reset --hard, git clean,
+git branch -D, git commit --no-verify, npm publish/-g, pkill, shutdown/reboot/halt,
+mkfs, dd, launchctl, mv -f) and SENSITIVE_READ (ssh/aws/gnupg/kube/gh/keychains/browser)
+are enforced here through this hook exactly as they are for Claude Code.
+
 This is why `hooks.json` sets `"failClosed": true` on both hook entries here,
 unlike the implicit "hook failure just doesn't block" posture that is
 acceptable in Claude Code (which still has `settings.json` deny as a backstop).

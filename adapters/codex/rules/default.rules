@@ -36,10 +36,12 @@
 # into Codex's PreToolUse hook. That brain independently catches recursive+forced `rm`
 # ANYWHERE in a chained command (not just at argv[0]), env-value reads, curl|sh /
 # wget|sh, sensitive-file cat, dd/mkfs/fdisk-on-device, and dangerous docker flags -
-# regardless of prefix position. It does NOT backstop git push --force, git reset --hard,
-# chmod, chown, sudo, npm publish/-g, pkill, shutdown/reboot/halt - those are Claude-native
-# `settings.json`-only conveniences today (not in safety_check.py's DANGEROUS list either),
-# so for Codex they exist ONLY as Rules entries below, with no hook-level second layer.
+# regardless of prefix position. As of the shared-core hardening it ALSO backstops the
+# canonical hard-deny commands below (sudo, chmod -R, chown, git push --force anywhere in
+# the command, git reset --hard, git clean, git branch -D, git commit --no-verify, npm
+# publish/-g, pkill, shutdown/reboot/halt, mkfs, dd if/of, launchctl, mv -f) via
+# safety_check.py's POLICY_DENY list. So every Rules entry below now has a genuine
+# hook-level second layer; this Rules file remains as Codex's native deterministic tier.
 
 # --- destructive filesystem ---------------------------------------------------
 prefix_rule(pattern=["rm", "-r"], decision="forbidden")
@@ -82,11 +84,11 @@ prefix_rule(pattern=["dd"], decision="forbidden")
 # --- git safety net -------------------------------------------------------------
 prefix_rule(pattern=["git", "push", "--force"], decision="forbidden")
 prefix_rule(pattern=["git", "push", "-f"], decision="forbidden")
-# GAP: Claude Code's deny also covers `git push origin --force` (flag NOT at argv
-# position 2) via wildcard patterns `git push *--force*` / `git push *-f *`. Rules'
-# prefix-only matching cannot express "flag anywhere in argv" - a force-push where the
-# remote is named before the flag is a documented gap in this file, not caught anywhere
-# else for Codex either (safety_check.py has no force-push check).
+# NOTE: this prefix rule only catches `git push --force` with the flag at argv position 2.
+# `git push origin --force` (flag after the remote) is NOT matched by Rules' prefix-only
+# mechanism - but it IS caught by the shared hook: safety_check.py's POLICY_DENY matches
+# `git push ... --force` with the force flag anywhere in the push command. So this Rules
+# gap is backstopped by the hook, not left open.
 prefix_rule(pattern=["git", "reset", "--hard"], decision="forbidden")
 prefix_rule(pattern=["git", "clean", "-f"], decision="forbidden")
 prefix_rule(pattern=["git", "clean", "-d"], decision="forbidden")
