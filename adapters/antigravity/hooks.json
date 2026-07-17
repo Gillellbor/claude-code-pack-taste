@@ -1,0 +1,16 @@
+{
+  "_comment": "BEST-EFFORT, UNCONFIRMED shape for Antigravity's .agents/hooks.json. Modeled on Claude Code's own hooks.json PreToolUse convention (see kernel/settings.json) as the closest documented analog, because Antigravity's own hook docs are 'mostly community-documented' with no official schema found during research - see docs/tool-agnostic-research-2026-07-08.md. The matcher is a wildcard because the exact tool names Antigravity's desktop app uses for shell execution vs file reads are unconfirmed; antigravity_safety_hook.py tries several plausible payload shapes at runtime instead of relying on a specific matcher/tool-name pairing. The command path assumes the bootstrap installer places the safety core and this wrapper together at ~/.gemini/safety/ (mirroring Claude Code's ~/.claude/safety/ convention) - adjust if your install differs, or set the PACK_SAFETY_DIR environment variable. If your Antigravity build rejects this '_comment' key or the overall shape, that itself is useful signal - see ../WARNING.md and ../PARITY.md before relying on any of this.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.gemini/safety/antigravity_safety_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}

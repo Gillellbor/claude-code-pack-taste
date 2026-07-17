@@ -1,13 +1,28 @@
 #!/usr/bin/env python3
 """
-PreToolUse safety hook for Bash + Read.
+Tool-agnostic safety decision core.
+
+Pure block/allow logic shared by every tool adapter (Claude Code, Codex, Cursor,
+Antigravity). `check_command` and `check_file_read` are side-effect-free - no I/O,
+no exit - so they are import-safe and unit-testable, and every per-tool normalizer
+feeds them the same way. Claude Code is the reference implementation.
+
+Command checks run in two layers: (1) the original bypass-detection ported verbatim from
+bash-safety-extended.py, and (2) POLICY_DENY - canonical hard-deny command patterns (sudo,
+chmod -R, chown, git push --force, git reset --hard, pkill, shutdown, ...) mirrored from
+Claude Code's settings.json deny-list, so tools WITHOUT a native deny-list (Cursor,
+Antigravity) enforce the FULL policy through this one shared brain. For Claude Code these are
+redundant (settings.json denies them first) but harmless. check_file_read likewise blocks
+reads of sensitive credential paths (ssh/aws/gnupg/kube/gh/...), not only .env. Deliberately
+NOT mirrored: the broad `export` / bare-`eval` denies (too disruptive as universal blocks)
+stay Claude-settings-only.
 
 Blocks dangerous patterns that plain deny rules miss:
 - two-step download-and-execute, pipe-to-shell, subshell/eval bypasses
 - recursive+forced rm hidden in a chained/compound command (deny rules only
   match rm at the start of a command)
 - a plain mv that would silently overwrite an existing destination
-- reading secret VALUES from env files into Claude's context
+- reading secret VALUES from env files into the model's context
 - reading ssh/aws/gnupg/git-credentials/browser data
 - docker host-root mount, --privileged, sensitive host mount
 - disk ops on physical devices, fork bombs
@@ -24,8 +39,6 @@ Env read policy (narrow, value-focused):
   `.env.production`, ... - are HARD: their VALUES never enter context.
 - For any hard env file, `list-env-keys.sh --from <path>` lists key NAMES only
   (add `--classify` for each key's state/kind, still never the value).
-
-Exit codes: 0 = allow, 2 = block with stderr message.
 """
 import json
 import os
@@ -181,65 +194,182 @@ DANGEROUS = [
 ]
 
 
-def block(reason, command=None):
-    print(f"BLOCKED by extended safety hook: {reason}", file=sys.stderr)
+# Canonical hard-deny command patterns, mirrored from kernel/settings.json's `deny` array.
+# Matched CASE-SENSITIVELY (unlike DANGEROUS): command flags are case-sensitive, so `-D`
+# (force-delete) must not also catch the safe `-d`, nor `-R` catch `-r`. For Claude Code these
+# are redundant with the settings.json deny; they exist here so Cursor / Antigravity - which
+# have no native deny-list - enforce the same hard blocks through the shared hook. Not mirrored:
+# the broad `export` / bare-`eval` denies (too disruptive as a universal block).
+POLICY_DENY = [
+    (r'\bmv\s+-[A-Za-z]*f', 'forced mv (-f) can silently overwrite the destination'),
+    (r'\bsudo\b', 'sudo - privilege escalation is blocked'),
+    (r'\bchmod\s+(-[A-Za-z]*R|777|666|\+s)', 'chmod recursive / world-writable / setuid'),
+    (r'\bchown\b', 'chown - ownership change is blocked'),
+    (r'\bmkfs(\.[a-z0-9]+)?\b', 'mkfs - filesystem creation is blocked'),
+    (r'\bdd\s+(if|of)=', 'dd raw disk read/write (if=/of=)'),
+    (r'\blaunchctl\b', 'launchctl - macOS service control is blocked'),
+    (r'\bgit\s+push\b[^|;&]*\s(--force|-f)\b', 'git push --force is blocked'),
+    (r'\bgit\s+reset\s+--hard\b', 'git reset --hard discards work; run it yourself if intended'),
+    (r'\bgit\s+clean\s+-[A-Za-z]*[fd]', 'git clean -f/-d deletes untracked files'),
+    (r'\bgit\s+branch\s+-D\b', 'git branch -D force-deletes a branch'),
+    (r'\bgit\s+commit\b[^|;&]*--no-verify', 'git commit --no-verify bypasses pre-commit hooks'),
+    (r'\bnpm\s+publish\b', 'npm publish is blocked'),
+    (r'\bnpm\s+(install|i)\b[^|;&]*\s(-g\b|--global\b)', 'npm global install is blocked'),
+    (r'\bpkill\b', 'pkill - bulk process kill is blocked'),
+    (r'\b(shutdown|reboot|halt)\b', 'system shutdown/reboot/halt is blocked'),
+]
+
+# Sensitive file paths whose CONTENTS must never enter the model's context, mirrored from
+# Claude Code's settings.json Read() denies. check_file_read blocks a native read tool from
+# opening these (the DANGEROUS list already covers the main ones read via a bash command).
+SENSITIVE_READ = [
+    (r'/\.ssh/', 'SSH keys / config'),
+    (r'/\.gnupg/', 'GPG keyring'),
+    (r'/\.aws/', 'AWS credentials'),
+    (r'/\.azure/', 'Azure credentials'),
+    (r'/\.kube/', 'Kubernetes config'),
+    (r'/\.config/gh/', 'GitHub CLI credentials'),
+    (r'\.git-credentials(?:\b|$)', 'git credentials'),
+    (r'/\.docker/config\.json(?:\b|$)', 'docker registry credentials'),
+    (r'/\.npmrc(?:\b|$)', 'npm credentials'),
+    (r'/\.pypirc(?:\b|$)', 'PyPI credentials'),
+    (r'/Library/Keychains/', 'macOS keychain'),
+    (r'/Library/(Cookies|Safari)/', 'browser data'),
+    (r'/Library/Application Support/(Google/Chrome|Chromium|Firefox|BraveSoftware|Microsoft Edge|Arc)/', 'browser data'),
+    (r'/\.(mozilla|config/google-chrome|config/chromium)/', 'browser data'),
+    (r'/Hesla', 'a passwords file'),
+]
+
+
+def check_command(command):
+    """Pure decision: return a block reason for an unsafe shell command, else None.
+
+    Composes the same four checks the Claude Code hook applied inline, in the same
+    order, so behavior is identical. No I/O, no exit - safe to import and unit-test,
+    and callable by every tool adapter.
+    """
+    if not command:
+        return None
+
+    reason = env_block_reason_bash(command)
+    if reason:
+        return reason
+
+    if rm_recursive_force(command):
+        return (
+            "recursive + forced rm in a chained/compound command. The deny rules "
+            "only catch rm at the start of a command; this catches it anywhere. "
+            "If you must delete recursively, ask the user to run it themselves."
+        )
+
+    mv_target = mv_overwrite_target(command)
+    if mv_target:
+        return (
+            "this mv would silently overwrite an existing path (%s). Verify it, then "
+            "move/rename deliberately - or remove the existing target yourself first."
+            % mv_target
+        )
+
+    for pattern, why in DANGEROUS:
+        if re.search(pattern, command, re.IGNORECASE):
+            return why
+
+    for pattern, why in POLICY_DENY:
+        if re.search(pattern, command):  # case-sensitive: -D vs -d, -R vs -r differ
+            return why
+
+    return None
+
+
+def check_file_read(file_path):
+    """Pure decision: block reading a secret file's values, else None.
+
+    Two tiers: (1) sensitive credential paths (ssh/aws/gnupg/kube/gh/keychains/browser
+    data/...) mirrored from Claude Code's settings.json Read() denies, blocked outright;
+    (2) .env / .env.* hard-protected except the soft .env.shared and placeholder
+    (.example/.sample/.template/.dist) files. Any other path is allowed.
+    """
+    if not file_path:
+        return None
+
+    for pattern, label in SENSITIVE_READ:
+        if re.search(pattern, file_path):
+            return (
+                "reading %s is blocked - these secrets must never enter the model's "
+                "context." % label
+            )
+
+    base = os.path.basename(file_path).lower()
+    if base == ".env" or base.startswith(".env."):
+        if _env_read_ok(base):
+            return None
+        return (
+            "reading a protected env file (%s) - use `%s --from %s` for key NAMES only "
+            "(add --classify for state), or read `.env.shared`."
+            % (os.path.basename(file_path), HELPER, file_path)
+        )
+    return None
+
+
+def normalize_claude(data):
+    """Claude Code hook JSON -> ('command', cmd) | ('read', path) | None."""
+    tool = data.get("tool_name")
+    tool_input = data.get("tool_input", {}) or {}
+    if tool == "Bash":
+        cmd = tool_input.get("command", "")
+        return ("command", cmd) if cmd else None
+    if tool == "Read":
+        fp = tool_input.get("file_path", "") or ""
+        return ("read", fp) if fp else None
+    return None
+
+
+NORMALIZERS = {
+    "claude": normalize_claude,
+    # later plans register: "codex", "cursor", "antigravity"
+}
+
+
+def emit_block(tool, reason, command=None):
+    """Write the tool-appropriate block signal and exit non-zero."""
+    if tool == "cursor":
+        # Cursor hooks read a JSON verdict on stdout (added in the Cursor adapter plan).
+        print(json.dumps({"permission": "deny", "user_message": reason}))
+        sys.exit(0)
+    # Claude Code + Codex: stderr message + exit code 2.
+    print(f"BLOCKED by safety hook: {reason}", file=sys.stderr)
     if command:
         print(f"Command: {command}", file=sys.stderr)
     print("This is a hard safety boundary. Do NOT retry with a workaround.", file=sys.stderr)
     sys.exit(2)
 
 
+def _parse_tool_arg(argv):
+    if "--tool" in argv:
+        i = argv.index("--tool")
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return "claude"
+
+
 def main():
+    tool = _parse_tool_arg(sys.argv)
+    normalize = NORMALIZERS.get(tool, normalize_claude)
     try:
         data = json.load(sys.stdin)
     except (json.JSONDecodeError, ValueError):
         sys.exit(0)
 
-    tool = data.get('tool_name')
-    tool_input = data.get('tool_input', {}) or {}
-
-    # Read tool: block reading protected env files; allow .env.shared + placeholders.
-    if tool == 'Read':
-        fp = tool_input.get('file_path', '') or ''
-        base = os.path.basename(fp).lower()
-        if base == '.env' or base.startswith('.env.'):
-            if _env_read_ok(base):
-                sys.exit(0)
-            block("reading a protected env file via Read tool (%s) - use "
-                  "`%s --from %s` for key NAMES only (add --classify for state), "
-                  "or read `.env.shared`."
-                  % (os.path.basename(fp), HELPER, fp))
+    norm = normalize(data)
+    if norm is None:
         sys.exit(0)
+    kind, payload = norm
 
-    if tool != 'Bash':
-        sys.exit(0)
-
-    command = tool_input.get('command', '')
-    if not command:
-        sys.exit(0)
-
-    reason = env_block_reason_bash(command)
+    reason = check_command(payload) if kind == "command" else check_file_read(payload)
     if reason:
-        block(reason, command)
-
-    if rm_recursive_force(command):
-        block("recursive + forced rm in a chained/compound command. The deny rules "
-              "only catch rm at the start of a command; this catches it anywhere. "
-              "If you must delete recursively, ask the user to run it themselves.",
-              command)
-
-    mv_target = mv_overwrite_target(command)
-    if mv_target:
-        block("this mv would silently overwrite an existing path (%s). Verify it, then "
-              "move/rename deliberately - or remove the existing target yourself first." % mv_target,
-              command)
-
-    for pattern, why in DANGEROUS:
-        if re.search(pattern, command, re.IGNORECASE):
-            block(why, command)
-
+        emit_block(tool, reason, payload if kind == "command" else None)
     sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

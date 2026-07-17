@@ -212,7 +212,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/bash-safety-extended.py"
+            "command": "~/.claude/safety/safety_check.py --tool claude"
           }
         ]
       },
@@ -225,7 +225,7 @@
           },
           {
             "type": "command",
-            "command": "~/.claude/hooks/bash-safety-extended.py"
+            "command": "~/.claude/safety/safety_check.py --tool claude"
           }
         ]
       }

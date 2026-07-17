@@ -233,7 +233,7 @@ Contents going in:
 - `rules/` - six rules (documentation, frontmatter-standard, respect-denies, subagents, notes, language)
 - `scripts/list-env-keys.sh` - lets Claude see *names* of credential env vars without values
 - `hooks/`:
-  - `bash-safety-extended.py` (PreToolUse Bash) - blocks bypass patterns
+  - `safety/safety_check.py` (PreToolUse Bash+Read) - blocks bypass patterns and protected env reads; shared by all tool adapters
   - `context-bloat-guard.py` (PreToolUse Read) - soft brake on huge file reads
   - `notes-research.sh` (PostToolUse Edit/Write) - auto-research on `notes.md` markers
   - `inject-current-time.sh` (UserPromptSubmit) - current time in every prompt
@@ -247,7 +247,7 @@ Execute the copy:
 
 ```bash
 cp -r kernel/. ~/.claude/
-chmod +x ~/.claude/scripts/*.sh ~/.claude/hooks/*.{sh,py} ~/.claude/statusline.sh
+chmod +x ~/.claude/scripts/*.sh ~/.claude/hooks/*.{sh,py} ~/.claude/safety/*.py ~/.claude/statusline.sh
 ```
 
 Re-create the `~/.claude/CLAUDE.md` symlink (it may not have copied as a symlink):
@@ -376,7 +376,7 @@ Their `ANTHROPIC_API_KEY` (and any other credentials they added) should appear b
 
 ### The one readable env file - `.env.shared`
 
-`~/.claude/.env` above is the GLOBAL credential store for hooks; Claude never reads its values. The model has three tiers: the global `~/.claude/.env` and every project `.env` / `.env.local` / `.env.production` / `.env.*` are HARD - Claude never reads their values (`.env.local` is HARD on purpose; the JS ecosystem treats it as the live-secret file, so live keys land there). The single readable env file is **`.env.shared`** - the soft tier for low-risk values safe to surface (a notify webhook, a contact email). The deny rules plus the `bash-safety-extended.py` hook block reading every HARD `.env` / `.env.*` (via `cat`, `source`, redirection, `python -c`, docker bind-mount, or the Read tool). A real secret is never read by Claude - a program uses it without revealing the value. To see only the key NAMES of any HARD env file, Claude runs `~/.claude/scripts/list-env-keys.sh --from <path>` (add `--classify` for each key's state). Scope note: only commands that read the *values* into view are blocked (`cat`, `source`, redirection, `python -c ...read()`); passing the file as config (`--env-file`), copying a template, or mentioning it in text all pass, so deploys and setup are not blocked.
+`~/.claude/.env` above is the GLOBAL credential store for hooks; Claude never reads its values. The model has three tiers: the global `~/.claude/.env` and every project `.env` / `.env.local` / `.env.production` / `.env.*` are HARD - Claude never reads their values (`.env.local` is HARD on purpose; the JS ecosystem treats it as the live-secret file, so live keys land there). The single readable env file is **`.env.shared`** - the soft tier for low-risk values safe to surface (a notify webhook, a contact email). The deny rules plus the `safety/safety_check.py` hook block reading every HARD `.env` / `.env.*` (via `cat`, `source`, redirection, `python -c`, docker bind-mount, or the Read tool). A real secret is never read by Claude - a program uses it without revealing the value. To see only the key NAMES of any HARD env file, Claude runs `~/.claude/scripts/list-env-keys.sh --from <path>` (add `--classify` for each key's state). Scope note: only commands that read the *values* into view are blocked (`cat`, `source`, redirection, `python -c ...read()`); passing the file as config (`--env-file`), copying a template, or mentioning it in text all pass, so deploys and setup are not blocked.
 
 ---
 
