@@ -1,7 +1,7 @@
 ---
 title: "Canonical safety policy"
 summary: "The single source of truth for what the pack blocks and why; every tool adapter realizes as much of it as its mechanism allows."
-status: approved
+status: draft
 type: core
 version: "1.0.0"
 release: latest
