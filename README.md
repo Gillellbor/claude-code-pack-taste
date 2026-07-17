@@ -65,6 +65,10 @@ Claude reads `INSTRUCTIONS.md` in the current directory, runs a pre-flight check
 
 If you already have a `~/.claude/` setup, the install respects it - backup is automatic, nothing is overwritten without your confirmation.
 
+### Other tools (Codex, Cursor, Antigravity)
+
+This pack is now tool-agnostic. The same shared safety core and behavioral baseline install into Codex, Cursor, or Antigravity too, each via its own adapter under `adapters/<tool>/`. Point your agent at [`bootstrap/INSTALL.md`](bootstrap/INSTALL.md) instead of `INSTRUCTIONS.md`: it detects which tool it is and wires the pack accordingly. Claude Code remains the canonical, fullest implementation; other tools enforce as much of the safety policy as their mechanism allows (see each `adapters/<tool>/PARITY.md`). Antigravity support is experimental and unverified - read `adapters/antigravity/WARNING.md` before using it on anything real.
+
 ### Dependency expectations
 
 The Pack assumes `python3`, `node`, `git`, `jq`, and `curl` are on PATH. If anything is missing, Claude stops and gives you the install command for your OS - it does not install dependencies for you (that's a system change you should make explicitly).
