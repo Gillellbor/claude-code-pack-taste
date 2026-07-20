@@ -80,7 +80,7 @@ To tighten it:
 - Add new patterns to `deny` for behaviors you've seen go wrong
 - Edit `bash-safety-extended.py` to add patterns that escape simple deny rules
 
-The starter pack uses `Edit/Write(~/.claude/settings*)` in deny so Claude can't silently change its own config. To edit, open the file directly in an editor. After editing, restart your Claude session for changes to take effect.
+The starter pack puts `Edit(~/.claude/settings*)` in `ask` so Claude can't silently change its own config (Edit rules gate all file-editing tools, including Write). To edit, open the file directly in an editor. After editing, restart your Claude session for changes to take effect.
 
 ## Scaling: solo → team → enterprise
 
